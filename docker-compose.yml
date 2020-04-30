@@ -1,0 +1,50 @@
+version: "3"
+
+services:
+  db:
+    container_name: j4u-db
+    image: postgres:11-alpine
+    restart: "no"
+    volumes:
+      - ${PWD}/pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  api:
+    container_name: j4u-api
+    restart: "no"
+    build:
+      context: ./server-context
+      args:
+        envfile: .env-test
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PW=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+    depends_on:
+      - db
+
+  webapp:
+    container_name: j4u-webapp
+    restart: "no"
+    build:
+      context: ./webapp-context
+      dockerfile: Dockerfile
+      args:
+        envfile: .env-test
+    depends_on:
+      - api
+
+  nginx:
+    container_name: j4u-nginx
+    restart: "no"
+    build:
+      context: ./nginx-context
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - webapp

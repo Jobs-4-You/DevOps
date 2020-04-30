@@ -1,0 +1,6 @@
+[submodule "webapp-context/Webapp"]
+	path = webapp-context/Webapp
+	url = git@github.com:Jobs-4-You/Webapp.git
+[submodule "server-context/Server"]
+	path = server-context/Server
+	url = git@github.com:Jobs-4-You/Server.git
