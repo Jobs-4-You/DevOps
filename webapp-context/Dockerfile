@@ -1,10 +1,9 @@
 FROM node:lts-alpine3.11 AS builder
-ARG envfile
 WORKDIR  /src
 COPY ./Webapp/package* ./
 RUN npm ci --verbose
 COPY ./Webapp/ .
-COPY $envfile ./.env
+COPY .env ./.env
 RUN npm run build
 RUN npm prune --production
 

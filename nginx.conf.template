@@ -37,7 +37,7 @@ http {
 
     server {
         listen 80;
-        server_name j4u;
+        server_name j4u.unil.ch;
 
         listen 443 ssl;
 
@@ -65,9 +65,21 @@ http {
             proxy_pass http://webapp:3000;
             proxy_read_timeout 90;
 
-            proxy_redirect http://webapp:3000 https://localhost;
+            proxy_redirect http://webapp:3000 https://${EXTERNAL_DOMAIN};
         }
 
+        location /api/graphql {
 
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+
+            # Fix the “It appears that your reverse proxy set up is broken" error.
+            proxy_pass http://api:5000/graphql;
+            proxy_read_timeout 90;
+
+            proxy_redirect http://webapp:3000 https://${EXTERNAL_DOMAIN};
+        }
     }
 }

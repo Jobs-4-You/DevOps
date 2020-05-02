@@ -1,5 +1,6 @@
-.env*
 pgdata
+.master-conf
+.env*
 *.crt
 *.key
 *.pem

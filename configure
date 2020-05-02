@@ -1,0 +1,114 @@
+#!/usr/bin/env fish
+
+set -l command $argv[1]
+
+function dotenv --description 'Load environment variables from .env file'
+    set -l envfile ".master-conf"
+    if [ (count $argv) -gt 0 ]
+        set envfile $argv[1]
+    end
+
+
+    if test -e $envfile
+        for line in (cat $envfile)
+            set -xg (echo $line | cut -d = -f 1) (echo $line | cut -d = -f 2-)
+        end
+    end
+end
+
+
+function clear
+    rm .env >/dev/null 2>&1
+    rm nginx-context/.env >/dev/null 2>&1
+    rm nginx-context/nginx.conf >/dev/null 2>&1
+    rm nginx-context/fullchain.pem >/dev/null 2>&1
+    rm nginx-context/privkey.pem >/dev/null 2>&1
+    rm server-context/.env >/dev/null 2>&1
+    rm server-context/wait-for-it.sh >/dev/null 2>&1
+    rm webapp-context/.env >/dev/null 2>&1
+end
+
+function compose_env
+    true >.env
+    echo POSTGRES_USER=$POSTGRES_USER >>.env
+    echo POSTGRES_PW=$POSTGRES_PW >>.env
+    echo POSTGRES_DB=$MODE >>.env
+end
+
+function server_env
+    true >server-context/.env
+    true >"server-context/wait-for-it.sh"
+
+    cat wait-for-it.sh >"server-context/wait-for-it.sh"
+
+    echo MODE=$MODE >>server-context/.env
+
+    echo EMAIL_USER=$EMAIL_USER >>server-context/.env
+    echo EMAIL_PW=$EMAIL_PW >>server-context/.env
+
+
+    echo APP_KEY=$APP_KEY >>server-context/.env
+    echo SALT=$SALT >>server-context/.env
+    echo JWT_KEY=$JWT_KEY >>server-context/.env
+
+    echo POSTGRES_IP=$POSTGRES_IP >>server-context/.env
+
+    echo QUALTRICS_TOKEN=$QUALTRICS_TOKEN >>server-context/.env
+    echo QUALTRICS_USER=$QUALTRICS_USER >>server-context/.env
+
+    echo URL=https://$EXTERNAL_DOMAIN:5000 >>server-context/.env
+    echo APP_URL=https://$EXTERNAL_DOMAIN >>server-context/.env
+    echo HOST=0.0.0.0 >>server-context/.env
+    echo PORT=5000 >>server-context/.env
+
+    echo GUNICORN_BIND=0.0.0.0:5000 >>server-context/.env
+    echo GUNICORN_WORKER_CLASS=$GUNICORN_WORKER_CLASS >>server-context/.env
+    echo GUNICORN_WORKERS=$GUNICORN_WORKERS >>server-context/.env
+end
+
+function webapp_env
+    true >webapp-context/.env
+
+    echo NEXT_GRAPHQL_PROXY_URI=https://$EXTERNAL_DOMAIN/api/graphql >>webapp-context/.env
+    echo GRAPHQL_URI=http://api:5000/graphql >>webapp-context/.env
+end
+
+function nginx_conf
+    true >nginx-context/nginx.conf
+    cp fullchain.pem nginx-context/fullchain.pem
+    cp privkey.pem nginx-context/privkey.pem
+
+
+    export EXTERNAL_DOMAIN=$EXTERNAL_DOMAIN
+    envsubst '${EXTERNAL_DOMAIN}' <nginx.conf.template >nginx-context/nginx.conf
+end
+
+
+
+if test "$command" = "clear"
+    echo $command
+    clear
+end
+
+if test "$command" = "gen"
+    echo $command
+    dotenv
+
+    if not contains $MODE "dev" "staging" "prod"
+        echo Error MODE $MODE invalid
+        exit
+    end
+
+    clear
+
+    if test "$MODE" = "dev"
+        set EXTERNAL_DOMAIN localhost
+    else
+        set EXTERNAL_DOMAIN j4u.unil.ch
+    end
+
+    compose_env
+    server_env
+    webapp_env
+    nginx_conf
+end

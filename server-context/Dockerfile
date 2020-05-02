@@ -5,8 +5,7 @@ COPY ./Server/requirements.txt .
 RUN pip install -r requirements.txt
 # Copy source
 COPY ./Server/ .
-ARG envfile
-COPY $envfile ./.dotenv
+COPY .env ./.dotenv
 # Intall local app package
 RUN pip install -e .
 WORKDIR /app/j4u_api
