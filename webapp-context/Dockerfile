@@ -9,6 +9,7 @@ RUN npm prune --production
 
 FROM node:lts-alpine3.11
 WORKDIR /app
+COPY --from=builder /src/public /app/public
 COPY --from=builder /src/node_modules /app/node_modules
 COPY --from=builder /src/package.json /app/package.json
 COPY --from=builder /src/.next /app/.next

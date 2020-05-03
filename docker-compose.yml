@@ -34,6 +34,25 @@ services:
       timeout: 5s
       retries: 5
 
+  jobs:
+    container_name: j4u-jobs
+    restart: "no"
+    build:
+      context: ./server-context
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PW=${POSTGRES_PW}
+      - POSTGRES_DB=${POSTGRES_DB}
+    depends_on:
+      - api
+    command: ["python", "run_scheduler.py"]
+
+    #healthcheck:
+    #  test: ["CMD-SHELL", "curl localhost:5000"]
+    #  interval: 10s
+    #  timeout: 5s
+    #  retries: 5
+
   webapp:
     container_name: j4u-webapp
     restart: "no"

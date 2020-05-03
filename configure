@@ -71,6 +71,7 @@ function webapp_env
 
     echo NEXT_GRAPHQL_PROXY_URI=https://$EXTERNAL_DOMAIN/api/graphql >>webapp-context/.env
     echo GRAPHQL_URI=http://api:5000/graphql >>webapp-context/.env
+    echo API_URI=https://$EXTERNAL_DOMAIN/api >>webapp-context/.env
 end
 
 function nginx_conf
