@@ -51,6 +51,8 @@ function server_env
     echo SALT=$SALT >>server-context/.env
     echo JWT_KEY=$JWT_KEY >>server-context/.env
 
+    echo GET_FEATURES_JOB_INTERVAL=$GET_FEATURES_JOB_INTERVAL >>server-context/.env
+
     echo POSTGRES_IP=$POSTGRES_IP >>server-context/.env
 
     echo QUALTRICS_TOKEN=$QUALTRICS_TOKEN >>server-context/.env
@@ -58,6 +60,7 @@ function server_env
 
     echo URL=https://$EXTERNAL_DOMAIN:5000 >>server-context/.env
     echo APP_URL=https://$EXTERNAL_DOMAIN >>server-context/.env
+    echo APP_DOCKER_URL=$APP_DOCKER_URL >>server-context/.env
     echo HOST=0.0.0.0 >>server-context/.env
     echo PORT=5000 >>server-context/.env
 
@@ -104,8 +107,12 @@ if test "$command" = "gen"
 
     if test "$MODE" = "dev"
         set EXTERNAL_DOMAIN localhost
+        set GET_FEATURES_JOB_INTERVAL 15
+        set APP_DOCKER_URL http://localhost:3000
     else
         set EXTERNAL_DOMAIN j4u.unil.ch
+        set GET_FEATURES_JOB_INTERVAL 1800
+        set APP_DOCKER_URL http://webapp:3000
     end
 
     compose_env
