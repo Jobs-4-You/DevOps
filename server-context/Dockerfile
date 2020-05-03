@@ -9,7 +9,9 @@ COPY .env ./.dotenv
 # Intall local app package
 RUN pip install -e .
 WORKDIR /app/j4u_api
+COPY wait-for-it.sh wait-for-it.sh
+RUN chmod +x wait-for-it.sh
 # Serve in production mode
-CMD python cli.py fresh-start --seed-test && python cli.py wsgi-serve
+CMD ./wait-for-it.sh db:5432 -- python cli.py fresh-start --seed-test && python cli.py wsgi-serve
 
 

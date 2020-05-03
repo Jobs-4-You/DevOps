@@ -108,10 +108,10 @@ if test "$command" = "gen"
     if test "$MODE" = "dev"
         set EXTERNAL_DOMAIN localhost
         set GET_FEATURES_JOB_INTERVAL 15
-        set APP_DOCKER_URL http://localhost:3000
+        set APP_DOCKER_URL http://webapp:3000
     else
         set EXTERNAL_DOMAIN j4u.unil.ch
-        set GET_FEATURES_JOB_INTERVAL 1800
+        set GET_FEATURES_JOB_INTERVAL 15
         set APP_DOCKER_URL http://webapp:3000
     end
 
