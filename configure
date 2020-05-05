@@ -50,6 +50,7 @@ function server_env
     echo APP_KEY=$APP_KEY >>server-context/.env
     echo SALT=$SALT >>server-context/.env
     echo JWT_KEY=$JWT_KEY >>server-context/.env
+    echo AUTH_TOKEN_EXPIRATION=$AUTH_TOKEN_EXPIRATION >>server-context/.env
 
     echo GET_FEATURES_JOB_INTERVAL=$GET_FEATURES_JOB_INTERVAL >>server-context/.env
 
@@ -111,7 +112,7 @@ if test "$command" = "gen"
         set APP_DOCKER_URL http://webapp:3000
     else
         set EXTERNAL_DOMAIN j4u.unil.ch
-        set GET_FEATURES_JOB_INTERVAL 15
+        set GET_FEATURES_JOB_INTERVAL 600
         set APP_DOCKER_URL http://webapp:3000
     end
 

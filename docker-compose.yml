@@ -45,7 +45,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     depends_on:
       - api
-    command: "./wait-for-it.sh api:5000 -- python run_scheduler.py"
+    command: "./wait-for-it.sh api:5000 -- python -u run_scheduler.py"
 
     #healthcheck:
     #  test: ["CMD-SHELL", "curl localhost:5000"]
