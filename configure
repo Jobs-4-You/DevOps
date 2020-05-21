@@ -33,6 +33,8 @@ function compose_env
     echo POSTGRES_USER=$POSTGRES_USER >>.env
     echo POSTGRES_PW=$POSTGRES_PW >>.env
     echo POSTGRES_DB=$MODE >>.env
+    echo ELK_VERSION=$ELK_VERSION >>.env
+    echo ELASTIC_PW=$ELASTIC_PW >>.env
 end
 
 function server_env
@@ -53,8 +55,12 @@ function server_env
     echo AUTH_TOKEN_EXPIRATION=$AUTH_TOKEN_EXPIRATION >>server-context/.env
 
     echo GET_FEATURES_JOB_INTERVAL=$GET_FEATURES_JOB_INTERVAL >>server-context/.env
+    echo HEARTBEAT_MAX_INTERVAL=$HEARTBEAT_MAX_INTERVAL >>server-context/.env
 
     echo POSTGRES_IP=$POSTGRES_IP >>server-context/.env
+
+    echo ELASTIC_IP=$ELASTIC_IP >>server-context/.env
+    echo ELASTIC_PW=$ELASTIC_PW >>server-context/.env
 
     echo QUALTRICS_TOKEN=$QUALTRICS_TOKEN >>server-context/.env
     echo QUALTRICS_USER=$QUALTRICS_USER >>server-context/.env

@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 
 services:
   db:
@@ -6,7 +6,11 @@ services:
     image: postgres:11-alpine
     restart: "no"
     volumes:
-      - ${PWD}/pgdata:/var/lib/postgresql/data
+      - type: volume
+        source: postgres
+        target: /var/lib/postgresql/data
+    ports:
+      - "5432:5432/tcp"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PW}
@@ -16,6 +20,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - api
 
   api:
     container_name: j4u-api
@@ -23,16 +29,20 @@ services:
     build:
       context: ./server-context
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PW=${POSTGRES_PW}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PW=$POSTGRES_PW
+      - POSTGRES_DB=$POSTGRES_DB
     depends_on:
       - db
+      - elasticsearch
     healthcheck:
       test: ["CMD-SHELL", "curl localhost:5000"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - api
+      - elk
 
   jobs:
     container_name: j4u-jobs
@@ -46,6 +56,8 @@ services:
     depends_on:
       - api
     command: "./wait-for-it.sh api:5000 -- python -u run_scheduler.py"
+    networks:
+      - api
 
     #healthcheck:
     #  test: ["CMD-SHELL", "curl localhost:5000"]
@@ -70,6 +82,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - api
 
   nginx:
     container_name: j4u-nginx
@@ -91,3 +105,88 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - api
+
+  # ELK stack
+
+  elasticsearch:
+    container_name: j4u-elasticsearch
+    build:
+      context: elk-context/elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elk-context/elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      ELASTIC_PASSWORD: $ELASTIC_PW
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks
+      # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+    networks:
+      - elk
+
+  logstash:
+    container_name: j4u-logstash
+    build:
+      context: elk-context/logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elk-context/logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    ports:
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    container_name: j4u-kibana
+    build:
+      context: elk-context/kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elk-context/kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    networks:
+      - elk
+    depends_on:
+      - elasticsearch
+
+volumes:
+  postgres:
+  elasticsearch:
+  logs:
+
+networks:
+  elk:
+    driver: bridge
+  api:
+    driver: bridge
