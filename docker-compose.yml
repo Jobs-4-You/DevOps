@@ -23,6 +23,30 @@ services:
     networks:
       - api
 
+  api-admin:
+    container_name: j4u-api-admin
+    restart: "no"
+    build:
+      context: ./server-context
+    environment:
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PW=$POSTGRES_PW
+      - POSTGRES_DB=$POSTGRES_DB
+    depends_on:
+      - db
+      - elasticsearch
+    healthcheck:
+      test: ["CMD-SHELL", "curl localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - api
+      - elk
+    command: "bash"
+    tty: true
+    stdin_open: true
+
   api:
     container_name: j4u-api
     restart: "no"

@@ -12,6 +12,6 @@ WORKDIR /app/j4u_api
 COPY wait-for-it.sh wait-for-it.sh
 RUN chmod +x wait-for-it.sh
 # Serve in production mode
-CMD ./wait-for-it.sh db:5432 -- ./wait-for-it.sh elasticsearch:9200 -- python cli.py fresh-start --seed-test && python cli.py wsgi-serve
+CMD ./wait-for-it.sh db:5432 -- ./wait-for-it.sh elasticsearch:9200 -- python cli.py wsgi-serve
 
 
