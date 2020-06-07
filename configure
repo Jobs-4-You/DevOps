@@ -116,10 +116,12 @@ if test "$command" = "gen"
         set EXTERNAL_DOMAIN localhost
         set GET_FEATURES_JOB_INTERVAL 15
         set APP_DOCKER_URL http://webapp:3000
+        set AUTH_TOKEN_EXPIRATION 600
     else
         set EXTERNAL_DOMAIN j4u.unil.ch
         set GET_FEATURES_JOB_INTERVAL 600
         set APP_DOCKER_URL http://webapp:3000
+        set AUTH_TOKEN_EXPIRATION 3600
     end
 
     compose_env
