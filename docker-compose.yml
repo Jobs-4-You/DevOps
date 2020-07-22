@@ -32,6 +32,10 @@ services:
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PW=$POSTGRES_PW
       - POSTGRES_DB=$POSTGRES_DB
+    volumes:
+      - type: volume
+        source: versions
+        target: /app/j4u_api/alembic/versions
     depends_on:
       - db
       - elasticsearch
@@ -208,6 +212,7 @@ volumes:
   postgres:
   elasticsearch:
   logs:
+  versions:
 
 networks:
   elk:
